@@ -5,7 +5,6 @@ function App() {
 
   return (
     <>
-      <h1 className='text-pink-300'>Doggy</h1>
       <Outlet />
     </>
   )

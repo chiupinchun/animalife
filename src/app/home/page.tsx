@@ -1,10 +1,15 @@
 import { FC } from 'react'
+import { Link } from 'react-router-dom'
 
 interface Props { }
 
 const Home: FC<Props> = () => {
   return (
-    <>home</>
+    <>
+      <div className='w-screen h-screen flex justify-center items-center'>
+        <Link to='/map'>進入遊戲</Link>
+      </div>
+    </>
   )
 }
 
