@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@app': path.resolve(__dirname, './src/app')
+      '@app': path.resolve(__dirname, './src/app'),
+      '@game': path.resolve(__dirname, './src/game')
     }
   },
   base: '/doggy/'
