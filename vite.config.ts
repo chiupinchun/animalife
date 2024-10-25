@@ -8,7 +8,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@app': path.resolve(__dirname, './src/app'),
-      '@game': path.resolve(__dirname, './src/game')
+      '@game': path.resolve(__dirname, './src/game'),
+      '@assets': path.resolve(__dirname, './src/assets')
     }
   },
   base: '/doggy/'
