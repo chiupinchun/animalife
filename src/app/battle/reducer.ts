@@ -58,7 +58,9 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
           state.summonedUnits.push(unit.summon(block.x, block.y))
 
           const index = state.standbyUnits.indexOf(unit)
-          state.standbyUnits.splice(index, 1)
+          if (index > -1) {
+            state.standbyUnits.splice(index, 1)
+          }
 
           return {
             ...state,
