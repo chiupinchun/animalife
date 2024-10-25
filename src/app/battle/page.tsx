@@ -126,7 +126,7 @@ const Battle: FC<Props> = () => {
           </div>
           <div className='p-4 border rounded-lg' onClick={stop()}>
             <h3 className='mb-4 border-b font-bold text-center'>手牌區</h3>
-            <div className='grid grid-cols-2 auto-rows-min items-start gap-4'>
+            <div className='grid grid-cols-4 md:grid-cols-2 auto-rows-min items-start gap-4'>
               {standbyUnits.map((unit, index) => (
                 <img
                   key={index} src={unit.avatar}
