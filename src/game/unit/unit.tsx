@@ -4,12 +4,22 @@ export abstract class Unit {
   abstract step: number
   abstract reach: number
 
+  abstract maxHp: number
+  abstract hp: number
+  abstract atk: number
+  abstract def: number
+
   abstract avatar: string
 
   summon(x: number, y: number) {
     this.x = x
     this.y = y
     return this
+  }
+
+  abstract skill(target: Unit): void
+  receiveDmg(value: number) {
+    this.hp = Math.max(this.hp - value, 0)
   }
 }
 

@@ -11,12 +11,12 @@ import { calcDistance } from '@app/common/utils/math'
 const getFakeTeam = () => {
   const units: Unit[] = []
   for (let i = 0; i < 6; i++) {
-    units.push(new Jack())
+    units.push(new Jack(10))
   }
   return units
 }
 
-const fakeEnemy = new Jack()
+const fakeEnemy = new Jack(20)
 fakeEnemy.x = 2
 fakeEnemy.y = 6
 
@@ -99,7 +99,7 @@ const Battle: FC<Props> = () => {
     return distance > 0 && distance <= state.selectedUnit.step
   }
 
-  const canAttack = (target: Unit) => {
+  const canAttack = (target: { x: number, y: number }) => {
     if (!state.selectedUnit) { return false }
     if (state.mode !== SelectMode.attack) { return false }
     const distance = calcDistance(
@@ -122,6 +122,15 @@ const Battle: FC<Props> = () => {
       type: 'selectUnit',
       payload: { unit, mode }
     })
+  }
+
+  const handleClickEnemyUnit = (target: Unit) => {
+    if (canAttack(target)) {
+      dispatch({
+        type: 'attack',
+        payload: { target }
+      })
+    }
   }
 
   const [blockSize, setBlockSize] = useState(0)
@@ -148,17 +157,16 @@ const Battle: FC<Props> = () => {
                 key={`${block.x},${block.y}`}
                 className={twMerge(
                   canSummon(block) ? 'bg-slate-300 cursor-pointer' : '',
-                  canMove(block) ? 'bg-green-300 cursor-pointer' : ''
+                  canMove(block) ? 'bg-green-300 cursor-pointer' : '',
+                  canAttack(block) ? 'bg-red-300' : ''
                 )}
                 onClick={() => handleClickBoard(block)}
-              >
-                {/* ({block.x}, {block.y}) */}
-              </BoardBlock>
+              />
             ))}
 
             <Units units={state.summonedUnits} onClickUnit={handleClickSummonedUnit} blockSize={blockSize} />
 
-            <Units units={state.enemies} onClickUnit={() => { }} isEnemy blockSize={blockSize} />
+            <Units units={state.enemies} onClickUnit={handleClickEnemyUnit} isEnemy blockSize={blockSize} />
           </div>
           <div className='p-4 border rounded-lg' onClick={stop()}>
             <h3 className='mb-4 border-b font-bold text-center'>手牌區</h3>

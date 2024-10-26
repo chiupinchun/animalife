@@ -31,9 +31,15 @@ export type ReducerAction = {
   payload: {
     block: Block
   }
+} | {
+  type: 'attack',
+  payload: {
+    target: Unit
+  }
 }
 
 export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => {
+  const { selectedUnit } = state
   switch (action.type) {
     case 'selectUnit':
       const { unit, mode } = action.payload
@@ -49,7 +55,6 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
         selectedUnit: null
       }
     case 'unitAction':
-      const { selectedUnit } = state
       const { block } = action.payload
 
       if (!selectedUnit) {
@@ -77,6 +82,20 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
             selectedUnit: null,
             mode: null
           }
+      }
+      break
+    case 'attack':
+      const { target } = action.payload
+
+      if (!selectedUnit) {
+        return { ...state, error: '未選擇要部署的角色。' }
+      }
+
+      selectedUnit.skill(target)
+      return {
+        ...state,
+        selectedUnit: null,
+        mode: null
       }
   }
   return state
