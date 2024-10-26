@@ -31,8 +31,8 @@ const BoardBlock: FC<{
       'w-24 h-24 border',
       className
     )} style={{
-      maxWidth: `calc(90vw / ${BOARD_X_COUNT})`,
-      maxHeight: `calc(90vw / ${BOARD_X_COUNT})`,
+      maxWidth: `calc(85vw / ${BOARD_X_COUNT})`,
+      maxHeight: `calc(85vw / ${BOARD_X_COUNT})`,
       ...style
     }}>{children}</div>
   </>)
@@ -129,7 +129,7 @@ const Battle: FC<Props> = () => {
   useEffect(() => {
     const setSize = () => {
       const blockRef = boardRef.current.children[0] as HTMLDivElement
-      setBlockSize(blockRef.offsetWidth)
+      setBlockSize(blockRef.getBoundingClientRect().width)
     }
     setSize()
     window.addEventListener('resize', setSize)
