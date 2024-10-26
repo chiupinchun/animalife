@@ -92,6 +92,13 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
       }
 
       selectedUnit.skill(target)
+      if (target.hp <= 0) {
+        const index = state.enemies.indexOf(target)
+        if (index > -1) {
+          state.enemies.splice(index, 1)
+        }
+      }
+
       return {
         ...state,
         selectedUnit: null,
