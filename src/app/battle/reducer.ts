@@ -13,6 +13,7 @@ export interface ReducerState {
   mode: SelectMode | null
   standbyUnits: Unit[]
   summonedUnits: Unit[]
+  enemies: Unit[]
 
   error: string | null
 }

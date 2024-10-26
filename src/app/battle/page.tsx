@@ -16,6 +16,10 @@ const getFakeTeam = () => {
   return units
 }
 
+const fakeEnemy = new Jack()
+fakeEnemy.x = 2
+fakeEnemy.y = 6
+
 const BoardBlock: FC<{
   children?: ReactNode
   className?: string
@@ -34,6 +38,30 @@ const BoardBlock: FC<{
   </>)
 }
 
+const Units: FC<{
+  units: Unit[]
+  onClickUnit: (unit: Unit) => void
+  isEnemy?: boolean
+  blockSize: number
+}> = ({ units, onClickUnit, isEnemy = false, blockSize }) => {
+
+  return units.map((unit, index) => (
+    <BoardBlock key={index} className='flex justify-center items-center absolute border-0 transition-all' style={{
+      left: unit.x * blockSize,
+      bottom: unit.y * blockSize
+    }}>
+      <img
+        src={unit.avatar}
+        className={twMerge(
+          'cursor-pointer',
+          isEnemy ? 'rotate-180' : ''
+        )}
+        onClick={() => onClickUnit(unit)}
+      />
+    </BoardBlock>
+  ))
+}
+
 interface Props { }
 
 const Battle: FC<Props> = () => {
@@ -44,6 +72,7 @@ const Battle: FC<Props> = () => {
     mode: null,
     standbyUnits: getFakeTeam(),
     summonedUnits: [],
+    enemies: [fakeEnemy],
     error: null
   })
 
@@ -121,18 +150,10 @@ const Battle: FC<Props> = () => {
                 {/* ({block.x}, {block.y}) */}
               </BoardBlock>
             ))}
-            {state.summonedUnits.map((unit, index) => (
-              <BoardBlock key={index} className='flex justify-center items-center absolute border-0 transition-all' style={{
-                left: unit.x * blockSize,
-                bottom: unit.y * blockSize
-              }}>
-                <img
-                  src={unit.avatar}
-                  className='cursor-pointer'
-                  onClick={() => handleClickSummonedUnit(unit)}
-                />
-              </BoardBlock>
-            ))}
+
+            <Units units={state.summonedUnits} onClickUnit={handleClickSummonedUnit} blockSize={blockSize} />
+
+            <Units units={state.enemies} onClickUnit={handleClickSummonedUnit} isEnemy blockSize={blockSize} />
           </div>
           <div className='p-4 border rounded-lg' onClick={stop()}>
             <h3 className='mb-4 border-b font-bold text-center'>手牌區</h3>
