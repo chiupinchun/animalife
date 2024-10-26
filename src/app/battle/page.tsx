@@ -158,7 +158,7 @@ const Battle: FC<Props> = () => {
 
             <Units units={state.summonedUnits} onClickUnit={handleClickSummonedUnit} blockSize={blockSize} />
 
-            <Units units={state.enemies} onClickUnit={handleClickSummonedUnit} isEnemy blockSize={blockSize} />
+            <Units units={state.enemies} onClickUnit={() => { }} isEnemy blockSize={blockSize} />
           </div>
           <div className='p-4 border rounded-lg' onClick={stop()}>
             <h3 className='mb-4 border-b font-bold text-center'>手牌區</h3>
