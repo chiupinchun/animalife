@@ -109,6 +109,11 @@ const Battle: FC<Props> = () => {
     return distance > 0 && distance <= state.selectedUnit.reach
   }
 
+  const handleClickBoard = (block: Block) => {
+    if (!canSummon(block) && !canMove(block)) { return }
+    dispatch({ type: 'unitAction', payload: { block } })
+  }
+
   const handleClickSummonedUnit = (unit: Unit) => {
     const mode = state.mode === SelectMode.move
       ? SelectMode.attack
@@ -145,7 +150,7 @@ const Battle: FC<Props> = () => {
                   canSummon(block) ? 'bg-slate-300 cursor-pointer' : '',
                   canMove(block) ? 'bg-green-300 cursor-pointer' : ''
                 )}
-                onClick={() => dispatch({ type: 'unitAction', payload: { block } })}
+                onClick={() => handleClickBoard(block)}
               >
                 {/* ({block.x}, {block.y}) */}
               </BoardBlock>
