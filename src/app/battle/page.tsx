@@ -62,7 +62,7 @@ const Units: FC<{
           )}
           onClick={() => onClickUnit(unit)}
         />
-        <HpBar {...unit} className='w-full' />
+        <HpBar {...unit} className='w-full' innerBarClassName={isEnemy ? '' : 'bg-green-500'} />
       </div>
     </BoardBlock>
   ))
