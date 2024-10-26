@@ -7,6 +7,7 @@ import { twMerge } from 'tailwind-merge'
 import { stop } from '@app/common/utils/elementEvent'
 import { reducer, SelectMode } from './reducer'
 import { calcDistance } from '@app/common/utils/math'
+import HpBar from '@app/common/components/hpBar'
 
 const getFakeTeam = () => {
   const units: Unit[] = []
@@ -46,18 +47,23 @@ const Units: FC<{
 }> = ({ units, onClickUnit, isEnemy = false, blockSize }) => {
 
   return units.map((unit, index) => (
-    <BoardBlock key={index} className='flex justify-center items-center absolute border-0 transition-all' style={{
-      left: unit.x * blockSize,
-      bottom: unit.y * blockSize
-    }}>
-      <img
-        src={unit.avatar}
-        className={twMerge(
-          'cursor-pointer',
-          isEnemy ? 'rotate-180' : ''
-        )}
-        onClick={() => onClickUnit(unit)}
-      />
+    <BoardBlock key={index}
+      className='flex flex-col justify-center items-center gap-1 absolute border-0 transition-all'
+      style={{
+        left: unit.x * blockSize,
+        bottom: unit.y * blockSize
+      }}>
+      <div className='space-y-1'>
+        <img
+          src={unit.avatar}
+          className={twMerge(
+            'cursor-pointer',
+            isEnemy ? 'rotate-180' : ''
+          )}
+          onClick={() => onClickUnit(unit)}
+        />
+        <HpBar {...unit} className='w-full' />
+      </div>
     </BoardBlock>
   ))
 }
