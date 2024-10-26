@@ -6,6 +6,7 @@ import { Jack } from '@game/unit/warrior/jack'
 import { twMerge } from 'tailwind-merge'
 import { stop } from '@app/common/utils/elementEvent'
 import { reducer, SelectMode } from './reducer'
+import { calcDistance } from '@app/common/utils/math'
 
 const getFakeTeam = () => {
   const units: Unit[] = []
@@ -59,6 +60,36 @@ const Battle: FC<Props> = () => {
     return state.mode === SelectMode.summon && block.areaType === BlockAreaType.ally
   }
 
+  const canMove = (block: Block) => {
+    if (!state.selectedUnit) { return false }
+    if (state.mode !== SelectMode.move) { return false }
+    const distance = calcDistance(
+      [state.selectedUnit.x, state.selectedUnit.y],
+      [block.x, block.y]
+    )
+    return distance > 0 && distance <= state.selectedUnit.step
+  }
+
+  const canAttack = (target: Unit) => {
+    if (!state.selectedUnit) { return false }
+    if (state.mode !== SelectMode.attack) { return false }
+    const distance = calcDistance(
+      [state.selectedUnit.x, state.selectedUnit.y],
+      [target.x, target.y]
+    )
+    return distance > 0 && distance <= state.selectedUnit.reach
+  }
+
+  const handleClickSummonedUnit = (unit: Unit) => {
+    const mode = state.mode === SelectMode.move
+      ? SelectMode.attack
+      : SelectMode.move
+    dispatch({
+      type: 'selectUnit',
+      payload: { unit, mode }
+    })
+  }
+
   const [blockSize, setBlockSize] = useState(0)
   const boardRef = useRef<HTMLDivElement>(null!)
   useEffect(() => {
@@ -82,7 +113,8 @@ const Battle: FC<Props> = () => {
               <BoardBlock
                 key={`${block.x},${block.y}`}
                 className={twMerge(
-                  canSummon(block) ? 'bg-slate-300 cursor-pointer' : ''
+                  canSummon(block) ? 'bg-slate-300 cursor-pointer' : '',
+                  canMove(block) ? 'bg-green-300 cursor-pointer' : ''
                 )}
                 onClick={() => dispatch({ type: 'unitAction', payload: { block } })}
               >
@@ -90,14 +122,14 @@ const Battle: FC<Props> = () => {
               </BoardBlock>
             ))}
             {state.summonedUnits.map((unit, index) => (
-              <BoardBlock key={index} className='flex justify-center items-center absolute border-0' style={{
+              <BoardBlock key={index} className='flex justify-center items-center absolute border-0 transition-all' style={{
                 left: unit.x * blockSize,
                 bottom: unit.y * blockSize
               }}>
                 <img
                   src={unit.avatar}
                   className='cursor-pointer'
-                  onClick={() => { }}
+                  onClick={() => handleClickSummonedUnit(unit)}
                 />
               </BoardBlock>
             ))}

@@ -1,6 +1,6 @@
-import { Tower } from "../unit";
+import { Warrior } from "../unit";
 import Avatar from '@assets/defaultAvatar.webp'
 
-export class Jack extends Tower {
+export class Jack extends Warrior {
   avatar = Avatar
 }
