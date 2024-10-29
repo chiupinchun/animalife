@@ -3,6 +3,7 @@ export abstract class Unit {
   y = 0
   abstract step: number
   abstract reach: number
+  abstract cost: number
 
   abstract maxHp: number
   abstract hp: number

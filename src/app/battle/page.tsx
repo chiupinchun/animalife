@@ -19,7 +19,7 @@ const Page: FC<Props> = () => {
 
   return (
     <>
-      <BattleCore team={team} enemies={enemies} />
+      <BattleCore team={team} enemies={enemies} initialCost={7} />
     </>
   )
 }

@@ -4,6 +4,7 @@ import Avatar from '@assets/defaultAvatar.webp'
 export class Jack extends Warrior {
   avatar = Avatar
 
+  cost = 3
   maxHp: number
   hp: number
   atk: number

@@ -14,6 +14,7 @@ export interface ReducerState {
   standbyUnits: Unit[]
   summonedUnits: Unit[]
   enemies: Unit[]
+  cost: number
 
   error: string | null
 }
@@ -36,6 +37,11 @@ export type ReducerAction = {
   payload: {
     target: Unit
   }
+} | {
+  type: 'turnEnd'
+} | {
+  type: 'error',
+  payload: string | null
 }
 
 export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => {
@@ -63,18 +69,27 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
 
       switch (state.mode) {
         case SelectMode.summon:
-          state.summonedUnits.push(selectedUnit.summon(block.x, block.y))
+          if (state.cost >= selectedUnit.cost) {
+            const newCost = state.cost - selectedUnit.cost;
+            const newSummonedUnits = [...state.summonedUnits, selectedUnit.summon(block.x, block.y)];
+            const newStandbyUnits = state.standbyUnits.filter((unit) => unit !== selectedUnit);
 
-          const index = state.standbyUnits.indexOf(selectedUnit)
-          if (index > -1) {
-            state.standbyUnits.splice(index, 1)
+            return {
+              ...state,
+              cost: newCost,
+              summonedUnits: newSummonedUnits,
+              standbyUnits: newStandbyUnits,
+              selectedUnit: null,
+              mode: null
+            };
           }
 
           return {
             ...state,
             selectedUnit: null,
-            mode: null
-          }
+            mode: null,
+            error: '資源不足。'
+          };
         case SelectMode.move:
           selectedUnit.summon(block.x, block.y)
           return {
@@ -103,6 +118,16 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
         ...state,
         selectedUnit: null,
         mode: null
+      }
+    case 'turnEnd':
+      return {
+        ...state,
+        cost: state.cost + 1
+      }
+    case 'error':
+      return {
+        ...state,
+        error: action.payload
       }
   }
   return state

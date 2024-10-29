@@ -7,6 +7,7 @@ import { stop } from '@app/common/utils/elementEvent'
 import { reducer, SelectMode } from './reducer'
 import { calcDistance } from '@app/common/utils/math'
 import HpBar from '@app/common/components/hpBar'
+import { Badge, Button, Snackbar } from '@mui/material'
 
 const BoardBlock: FC<{
   children?: ReactNode
@@ -56,11 +57,12 @@ const Units: FC<{
 }
 
 interface Props {
+  initialCost: number
   team: Unit[]
   enemies: Unit[]
 }
 
-const BattleCore: FC<Props> = ({ team, enemies }) => {
+const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
   const board = useRef(getInitialBoard(BOARD_X_COUNT, BOARD_Y_COUNT, DOMAIN_LENGTH))
 
   const [state, dispatch] = useReducer(reducer, {
@@ -69,6 +71,7 @@ const BattleCore: FC<Props> = ({ team, enemies }) => {
     standbyUnits: team,
     summonedUnits: [],
     enemies: enemies,
+    cost: initialCost,
     error: null
   })
 
@@ -103,6 +106,14 @@ const BattleCore: FC<Props> = ({ team, enemies }) => {
       [target.x, target.y]
     )
     return distance > 0 && distance <= state.selectedUnit.reach
+  }
+
+  const handleClickStandbyUnit = (unit: Unit) => {
+    if (state.cost < unit.cost) {
+      dispatch({ type: 'error', payload: '資源不足。' })
+      return
+    }
+    dispatch({ type: 'selectUnit', payload: { unit, mode: SelectMode.summon } })
   }
 
   const handleClickBoard = (block: Block) => {
@@ -164,20 +175,36 @@ const BattleCore: FC<Props> = ({ team, enemies }) => {
 
             <Units units={state.enemies} onClickUnit={handleClickEnemyUnit} isEnemy blockSize={blockSize} />
           </div>
-          <div className='p-4 border rounded-lg' onClick={stop()}>
-            <h3 className='mb-4 border-b font-bold text-center'>手牌區</h3>
-            <div className='grid grid-cols-4 md:grid-cols-2 auto-rows-min items-start gap-4 md:w-32'>
-              {state.standbyUnits.map((unit, index) => (
-                <img
-                  key={index} src={unit.avatar}
-                  className='cursor-pointer'
-                  onClick={() => dispatch({ type: 'selectUnit', payload: { unit, mode: SelectMode.summon } })}
-                />
-              ))}
+          <div className='flex flex-col justify-between p-4 border rounded-lg' onClick={stop()}>
+            <div>
+              <div className='flex justify-between mb-4 border-b font-bold'>手牌區</div>
+              <div className='grid grid-cols-4 md:grid-cols-2 auto-rows-min gap-4 md:w-32'>
+                {state.standbyUnits.map((unit, index) => (
+                  <Badge key={index} badgeContent={unit.cost} color="primary">
+                    <img src={unit.avatar}
+                      className='cursor-pointer'
+                      onClick={() => handleClickStandbyUnit(unit)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <div className='border-t'>
+              <div className='flex justify-between my-1'>
+                可用資源：
+                <span>{state.cost}</span>
+              </div>
+              <Button onClick={() => dispatch({ type: 'turnEnd' })} className='w-full' variant="contained">回合結束</Button>
             </div>
           </div>
         </div>
       </div>
+
+      <Snackbar
+        message={state.error} open={!!state.error} autoHideDuration={1000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        onClose={() => dispatch({ type: 'error', payload: null })}
+      />
     </>
   )
 }
