@@ -4,7 +4,7 @@ import { BOARD_Y_COUNT, BOARD_X_COUNT, DOMAIN_LENGTH } from '../constants/game'
 import { Unit } from '@game/unit/unit'
 import { twMerge } from 'tailwind-merge'
 import { stop } from '@app/common/utils/elementEvent'
-import { reducer } from './reducer'
+import { reducer, Team } from './reducer'
 import HpBar from '@app/common/components/hpBar'
 import { Badge, Button, Snackbar } from '@mui/material'
 
@@ -26,33 +26,31 @@ const BoardBlock: FC<{
   </>)
 }
 
-const Units: FC<{
-  units: Unit[]
-  onClickUnit: (unit: Unit) => void
+const UnitComponent: FC<{
+  unit: Unit
+  onClick?: () => void
   isEnemy?: boolean
   blockSize: number
-}> = ({ units, onClickUnit, isEnemy = false, blockSize }) => {
+}> = ({ unit, onClick, isEnemy = false, blockSize }) => {
 
-  return units.map((unit) => (
-    <BoardBlock key={unit.index}
-      className='flex flex-col justify-center items-center gap-1 absolute border-0 transition-all'
-      style={{
-        left: unit.x * blockSize,
-        bottom: unit.y * blockSize
-      }}>
-      <div className='space-y-1'>
-        <img
-          src={unit.avatar}
-          className={twMerge(
-            'cursor-pointer',
-            isEnemy ? 'rotate-180' : ''
-          )}
-          onClick={() => onClickUnit(unit)}
-        />
-        <HpBar {...unit} className='w-full' innerBarClassName={isEnemy ? '' : 'bg-green-500'} />
-      </div>
-    </BoardBlock>
-  ))
+  return <BoardBlock key={unit.index}
+    className='flex flex-col justify-center items-center gap-1 absolute border-0 transition-all'
+    style={{
+      left: unit.x * blockSize,
+      bottom: unit.y * blockSize
+    }}>
+    <div className='space-y-1'>
+      <img
+        src={unit.avatar}
+        className={twMerge(
+          'cursor-pointer',
+          isEnemy ? 'rotate-180' : ''
+        )}
+        onClick={onClick}
+      />
+      <HpBar {...unit} className='w-full' innerBarClassName={isEnemy ? '' : 'bg-green-500'} />
+    </div>
+  </BoardBlock>
 }
 
 enum TurnPhase {
@@ -64,23 +62,20 @@ enum TurnPhase {
 
 interface Props {
   initialCost: number
-  team: Unit[]
-  enemies: Unit[]
+  allies: Team
+  enemies: Team
 }
 
-const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
+const BattleCore: FC<Props> = ({ allies, enemies, initialCost }) => {
   const board = useRef(getInitialBoard(BOARD_X_COUNT, BOARD_Y_COUNT, DOMAIN_LENGTH))
 
+  allies.leader.x = enemies.leader.x = Math.floor(BOARD_X_COUNT / 2)
+  allies.leader.y = 0
+  enemies.leader.y = BOARD_Y_COUNT - 1
   const [state, dispatch] = useReducer(reducer, {
     selectedUnit: null,
-    allies: {
-      standby: team,
-      summoned: []
-    },
-    enemies: {
-      standby: [],
-      summoned: enemies
-    },
+    allies,
+    enemies,
     cost: initialCost,
     error: null
   })
@@ -179,9 +174,15 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
               />
             ))}
 
-            <Units onClickUnit={() => { }} units={state.allies.summoned} blockSize={blockSize} />
+            <UnitComponent unit={state.allies.leader} blockSize={blockSize} />
+            {state.allies.summoned.map(unit => (
+              <UnitComponent key={unit.index} unit={unit} blockSize={blockSize} />
+            ))}
 
-            <Units onClickUnit={() => { }} units={state.enemies.summoned} isEnemy blockSize={blockSize} />
+            <UnitComponent unit={state.enemies.leader} isEnemy blockSize={blockSize} />
+            {state.enemies.summoned.map(unit => (
+              <UnitComponent key={unit.index} unit={unit} isEnemy blockSize={blockSize} />
+            ))}
           </div>
           <div className='flex flex-col justify-between p-4 border rounded-lg' onClick={stop()}>
             <div>

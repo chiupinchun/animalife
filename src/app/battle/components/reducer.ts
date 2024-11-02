@@ -3,16 +3,16 @@ import { Unit } from "@game/unit/unit";
 import { Reducer } from "react";
 import { BOARD_Y_COUNT, COST_LIMIT } from "../constants/game";
 
+export interface Team {
+  leader: Unit
+  standby: Unit[]
+  summoned: Unit[]
+}
+
 export interface ReducerState {
   selectedUnit: Unit | null
-  allies: {
-    standby: Unit[]
-    summoned: Unit[]
-  }
-  enemies: {
-    standby: Unit[]
-    summoned: Unit[]
-  }
+  allies: Team
+  enemies: Team
   cost: number
 
   error: string | null
@@ -72,6 +72,7 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
           ...state,
           cost: newCost,
           allies: {
+            ...state.allies,
             summoned: newSummonedUnits,
             standby: newStandbyUnits
           },
@@ -86,11 +87,13 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
       }
     case 'action':
       const unitToAction = action.payload.unit
+      const allyTargets = state.allies.summoned.concat(state.allies.leader)
+      const enemyTargets = state.enemies.summoned.concat(state.enemies.leader)
       const isEnemy = state.enemies.summoned.includes(unitToAction)
 
       const skillTargetGroup = unitToAction.searchTarget(
-        isEnemy ? state.allies.summoned : state.enemies.summoned,
-        isEnemy ? state.enemies.summoned : state.allies.summoned
+        isEnemy ? allyTargets : enemyTargets,
+        isEnemy ? enemyTargets : allyTargets
       )
       if (skillTargetGroup.some(targets => targets.length)) {
         unitToAction.skill(...skillTargetGroup)
@@ -117,7 +120,7 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
       const isBlocked = (unit: Unit) => unit.x === goalCoordinate.x
         && (unit.y - unitToAction.y) * directY > 0
         && Math.abs(unit.y - unitToAction.y) <= unitToAction.step
-      const isGoalContainUnit = state.enemies.summoned.some(isBlocked) || state.allies.summoned.some(isBlocked)
+      const isGoalContainUnit = enemyTargets.some(isBlocked) || allyTargets.some(isBlocked)
       if (isGoalContainUnit) { return state }
 
       const newUnit = Object.assign(
