@@ -7,13 +7,13 @@ export interface Team {
   leader: Unit
   standby: Unit[]
   summoned: Unit[]
+  cost: number
 }
 
 export interface ReducerState {
   selectedUnit: Unit | null
   allies: Team
   enemies: Team
-  cost: number
 
   error: string | null
 }
@@ -26,7 +26,7 @@ export type ReducerAction = {
 } | {
   type: 'clearSelection'
 } | {
-  type: 'summon',
+  type: 'summonAlly',
   payload: {
     block: Block
   }
@@ -37,6 +37,8 @@ export type ReducerAction = {
   }
 } | {
   type: 'turnEnd'
+} | {
+  type: 'summonEnemy'
 } | {
   type: 'error',
   payload: string | null
@@ -56,25 +58,25 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
         ...state,
         selectedUnit: null
       }
-    case 'summon':
+    case 'summonAlly':
       const { block } = action.payload
 
       if (!selectedUnit) {
         return { ...state, error: '未選擇要部署的角色。' }
       }
 
-      if (state.cost >= selectedUnit.cost) {
-        const newCost = state.cost - selectedUnit.cost;
+      if (state.allies.cost >= selectedUnit.cost) {
+        const newCost = state.allies.cost - selectedUnit.cost;
         const newSummonedUnits = [...state.allies.summoned, selectedUnit.summon(block.x, block.y)];
         const newStandbyUnits = state.allies.standby.filter((unit) => unit !== selectedUnit);
 
         return {
           ...state,
-          cost: newCost,
           allies: {
             ...state.allies,
             summoned: newSummonedUnits,
-            standby: newStandbyUnits
+            standby: newStandbyUnits,
+            cost: newCost
           },
           selectedUnit: null
         }
@@ -149,8 +151,18 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
     case 'turnEnd':
       return {
         ...state,
-        cost: Math.min(state.cost + 1, COST_LIMIT)
+        allies: {
+          ...state.allies,
+          cost: Math.min(state.allies.cost + 1, COST_LIMIT)
+        },
+        enemies: {
+          ...state.enemies,
+          cost: Math.min(state.enemies.cost + 1, COST_LIMIT)
+        }
       }
+    case 'summonEnemy':
+      // TODO
+      break
     case 'error':
       return {
         ...state,

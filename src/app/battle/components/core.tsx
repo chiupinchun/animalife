@@ -61,12 +61,11 @@ enum TurnPhase {
 }
 
 interface Props {
-  initialCost: number
   allies: Team
   enemies: Team
 }
 
-const BattleCore: FC<Props> = ({ allies, enemies, initialCost }) => {
+const BattleCore: FC<Props> = ({ allies, enemies }) => {
   const board = useRef(getInitialBoard(BOARD_X_COUNT, BOARD_Y_COUNT, DOMAIN_LENGTH))
 
   allies.leader.x = enemies.leader.x = Math.floor(BOARD_X_COUNT / 2)
@@ -76,7 +75,6 @@ const BattleCore: FC<Props> = ({ allies, enemies, initialCost }) => {
     selectedUnit: null,
     allies,
     enemies,
-    cost: initialCost,
     error: null
   })
 
@@ -109,6 +107,9 @@ const BattleCore: FC<Props> = ({ allies, enemies, initialCost }) => {
         )
         break
       case TurnPhase.enemyAction:
+        if (state.enemies.standby.length) {
+          // TODO
+        }
         setTurnPhase(TurnPhase.allyMove)
         break
     }
@@ -129,7 +130,7 @@ const BattleCore: FC<Props> = ({ allies, enemies, initialCost }) => {
 
   const handleClickStandbyUnit = (unit: Unit) => {
     if (turnPhase !== TurnPhase.allyAction) { return }
-    if (state.cost < unit.cost) {
+    if (state.allies.cost < unit.cost) {
       dispatch({ type: 'error', payload: '資源不足。' })
       return
     }
@@ -138,7 +139,7 @@ const BattleCore: FC<Props> = ({ allies, enemies, initialCost }) => {
 
   const handleClickBoard = (block: Block) => {
     if (!canSummon(block)) { return }
-    dispatch({ type: 'summon', payload: { block } })
+    dispatch({ type: 'summonAlly', payload: { block } })
   }
 
   const handleTurnEnd = () => {
@@ -202,7 +203,7 @@ const BattleCore: FC<Props> = ({ allies, enemies, initialCost }) => {
             <div className='border-t'>
               <div className='flex justify-between my-1'>
                 可用資源：
-                <span>{state.cost}</span>
+                <span>{state.allies.cost}</span>
               </div>
               <Button onClick={handleTurnEnd} className='w-full' variant="contained">回合結束</Button>
             </div>
