@@ -73,10 +73,14 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
 
   const [state, dispatch] = useReducer(reducer, {
     selectedUnit: null,
-    standbyAllies: team,
-    summonedAllies: [],
-    standbyEnemies: [],
-    summonedEnemies: enemies,
+    allies: {
+      standby: team,
+      summoned: []
+    },
+    enemies: {
+      standby: [],
+      summoned: enemies
+    },
     cost: initialCost,
     error: null
   })
@@ -97,7 +101,7 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
     switch (turnPhase) {
       case TurnPhase.allyMove:
         handleMoveUnits(
-          state.summonedAllies,
+          state.allies.summoned,
           () => setTurnPhase(phase => phase + 1)
         )
         break
@@ -105,7 +109,7 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
         break
       case TurnPhase.enemyMove:
         handleMoveUnits(
-          state.summonedEnemies,
+          state.enemies.summoned,
           () => setTurnPhase(phase => phase + 1)
         )
         break
@@ -175,15 +179,15 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
               />
             ))}
 
-            <Units onClickUnit={() => { }} units={state.summonedAllies} blockSize={blockSize} />
+            <Units onClickUnit={() => { }} units={state.allies.summoned} blockSize={blockSize} />
 
-            <Units onClickUnit={() => { }} units={state.summonedEnemies} isEnemy blockSize={blockSize} />
+            <Units onClickUnit={() => { }} units={state.enemies.summoned} isEnemy blockSize={blockSize} />
           </div>
           <div className='flex flex-col justify-between p-4 border rounded-lg' onClick={stop()}>
             <div>
               <div className='flex justify-between mb-4 border-b font-bold'>手牌區</div>
               <div className='grid grid-cols-4 md:grid-cols-2 auto-rows-min gap-4 md:w-32'>
-                {state.standbyAllies.map((unit, index) => (
+                {state.allies.standby.map((unit, index) => (
                   <Badge key={index} badgeContent={unit.cost} color="primary">
                     <img src={unit.avatar}
                       className='cursor-pointer'

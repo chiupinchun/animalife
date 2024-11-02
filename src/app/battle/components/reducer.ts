@@ -5,10 +5,14 @@ import { BOARD_Y_COUNT, COST_LIMIT } from "../constants/game";
 
 export interface ReducerState {
   selectedUnit: Unit | null
-  standbyAllies: Unit[]
-  summonedAllies: Unit[]
-  standbyEnemies: Unit[]
-  summonedEnemies: Unit[]
+  allies: {
+    standby: Unit[]
+    summoned: Unit[]
+  }
+  enemies: {
+    standby: Unit[]
+    summoned: Unit[]
+  }
   cost: number
 
   error: string | null
@@ -61,14 +65,16 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
 
       if (state.cost >= selectedUnit.cost) {
         const newCost = state.cost - selectedUnit.cost;
-        const newSummonedUnits = [...state.summonedAllies, selectedUnit.summon(block.x, block.y)];
-        const newStandbyUnits = state.standbyAllies.filter((unit) => unit !== selectedUnit);
+        const newSummonedUnits = [...state.allies.summoned, selectedUnit.summon(block.x, block.y)];
+        const newStandbyUnits = state.allies.standby.filter((unit) => unit !== selectedUnit);
 
         return {
           ...state,
           cost: newCost,
-          summonedAllies: newSummonedUnits,
-          standbyAllies: newStandbyUnits,
+          allies: {
+            summoned: newSummonedUnits,
+            standby: newStandbyUnits
+          },
           selectedUnit: null
         }
       }
@@ -80,19 +86,25 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
       }
     case 'action':
       const unitToAction = action.payload.unit
-      const isEnemy = state.summonedEnemies.includes(unitToAction)
+      const isEnemy = state.enemies.summoned.includes(unitToAction)
 
       const skillTargetGroup = unitToAction.searchTarget(
-        isEnemy ? state.summonedAllies : state.summonedEnemies,
-        isEnemy ? state.summonedEnemies : state.summonedAllies
+        isEnemy ? state.allies.summoned : state.enemies.summoned,
+        isEnemy ? state.enemies.summoned : state.allies.summoned
       )
       if (skillTargetGroup.some(targets => targets.length)) {
         unitToAction.skill(...skillTargetGroup)
 
         return {
           ...state,
-          summonedEnemies: state.summonedEnemies.filter(unit => unit.hp > 0),
-          summonedAllies: state.summonedAllies.filter(unit => unit.hp > 0),
+          enemies: {
+            ...state.enemies,
+            summoned: state.enemies.summoned.filter(unit => unit.hp > 0)
+          },
+          allies: {
+            ...state.allies,
+            summoned: state.allies.summoned.filter(unit => unit.hp > 0)
+          },
           selectedUnit: null,
           mode: null
         }
@@ -105,7 +117,7 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
       const isBlocked = (unit: Unit) => unit.x === goalCoordinate.x
         && (unit.y - unitToAction.y) * directY > 0
         && Math.abs(unit.y - unitToAction.y) <= unitToAction.step
-      const isGoalContainUnit = state.summonedEnemies.some(isBlocked) || state.summonedAllies.some(isBlocked)
+      const isGoalContainUnit = state.enemies.summoned.some(isBlocked) || state.allies.summoned.some(isBlocked)
       if (isGoalContainUnit) { return state }
 
       const newUnit = Object.assign(
@@ -113,17 +125,23 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
         structuredClone(unitToAction)
       )
       newUnit.y = goalCoordinate.y
-      const newEnemies = state.summonedEnemies.map(unit =>
+      const newEnemies = state.enemies.summoned.map(unit =>
         unit === unitToAction ? newUnit : unit
       )
-      const newSummonedUnits = state.summonedAllies.map(unit =>
+      const newSummonedUnits = state.allies.summoned.map(unit =>
         unit === unitToAction ? newUnit : unit
       )
 
       return {
         ...state,
-        summonedEnemies: state.summonedEnemies.includes(unitToAction) ? newEnemies : state.summonedEnemies,
-        summonedAllies: state.summonedAllies.includes(unitToAction) ? newSummonedUnits : state.summonedAllies,
+        enemies: {
+          ...state.enemies,
+          summoned: state.enemies.summoned.includes(unitToAction) ? newEnemies : state.enemies.summoned
+        },
+        allies: {
+          ...state.allies,
+          summoned: state.allies.summoned.includes(unitToAction) ? newSummonedUnits : state.allies.summoned
+        }
       }
     case 'turnEnd':
       return {
