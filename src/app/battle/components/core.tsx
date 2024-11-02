@@ -4,9 +4,10 @@ import { BOARD_Y_COUNT, BOARD_X_COUNT, DOMAIN_LENGTH } from '../constants/game'
 import { Unit } from '@game/unit/unit'
 import { twMerge } from 'tailwind-merge'
 import { stop } from '@app/common/utils/elementEvent'
-import { reducer, Team } from './reducer'
+import { reducer } from './reducer'
 import HpBar from '@app/common/components/hpBar'
 import { Badge, Button, Snackbar } from '@mui/material'
+import { BattleCtx, Team } from '@game/types/battle'
 
 const BoardBlock: FC<{
   children?: ReactNode
@@ -63,10 +64,8 @@ enum TurnPhase {
 interface Props {
   allies: Team
   enemies: Team
-  onBattleEnd: (battleCtx: {
+  onBattleEnd: (battleCtx: BattleCtx & {
     isWin: boolean
-    allies: Team
-    enemies: Team
   }) => void
 }
 

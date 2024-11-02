@@ -3,13 +3,7 @@ import { Unit } from "@game/unit/unit";
 import { Reducer } from "react";
 import { BOARD_Y_COUNT, COST_LIMIT } from "../constants/game";
 import { getAutoSummonCoordinate } from "../utils/game";
-
-export interface Team {
-  leader: Unit
-  standby: Unit[]
-  summoned: Unit[]
-  cost: number
-}
+import { Team } from "@game/types/battle";
 
 export interface ReducerState {
   selectedUnit: Unit | null

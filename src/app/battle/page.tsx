@@ -1,9 +1,9 @@
 import { FC } from 'react'
 import BattleCore from './components/core'
 import { MercenaryJason } from '@game/unit/warrior/jack'
-import { Team } from './components/reducer'
 import { Unit } from '@game/unit/unit'
 import { INITIAL_COST } from './constants/game'
+import { Team } from '@game/types/battle'
 
 const getFakeUnits = (count: number) => {
   const units: Unit[] = []
