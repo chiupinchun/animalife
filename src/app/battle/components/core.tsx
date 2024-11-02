@@ -149,7 +149,7 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
 
   const handleClickBoard = (block: Block) => {
     if (!canSummon(block)) { return }
-    dispatch({ type: 'unitAction', payload: { block } })
+    dispatch({ type: 'summon', payload: { block } })
   }
 
   const handleClickSummonedUnit = (unit: Unit) => {

@@ -28,7 +28,7 @@ export type ReducerAction = {
 } | {
   type: 'clearSelection'
 } | {
-  type: 'unitAction',
+  type: 'summon',
   payload: {
     block: Block
   }
@@ -65,38 +65,34 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
         mode: null,
         selectedUnit: null
       }
-    case 'unitAction':
+    case 'summon':
       const { block } = action.payload
 
       if (!selectedUnit) {
         return { ...state, error: '未選擇要部署的角色。' }
       }
 
-      switch (state.mode) {
-        case SelectMode.summon:
-          if (state.cost >= selectedUnit.cost) {
-            const newCost = state.cost - selectedUnit.cost;
-            const newSummonedUnits = [...state.summonedUnits, selectedUnit.summon(block.x, block.y)];
-            const newStandbyUnits = state.standbyUnits.filter((unit) => unit !== selectedUnit);
+      if (state.cost >= selectedUnit.cost) {
+        const newCost = state.cost - selectedUnit.cost;
+        const newSummonedUnits = [...state.summonedUnits, selectedUnit.summon(block.x, block.y)];
+        const newStandbyUnits = state.standbyUnits.filter((unit) => unit !== selectedUnit);
 
-            return {
-              ...state,
-              cost: newCost,
-              summonedUnits: newSummonedUnits,
-              standbyUnits: newStandbyUnits,
-              selectedUnit: null,
-              mode: null
-            };
-          }
-
-          return {
-            ...state,
-            selectedUnit: null,
-            mode: null,
-            error: '資源不足。'
-          };
+        return {
+          ...state,
+          cost: newCost,
+          summonedUnits: newSummonedUnits,
+          standbyUnits: newStandbyUnits,
+          selectedUnit: null,
+          mode: null
+        }
       }
-      break
+
+      return {
+        ...state,
+        selectedUnit: null,
+        mode: null,
+        error: '資源不足。'
+      }
     case 'move':
       const unitToMove = action.payload.unit
       const directY = state.enemies.includes(unitToMove) ? -1 : 1
