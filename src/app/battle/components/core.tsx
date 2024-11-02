@@ -33,8 +33,8 @@ const Units: FC<{
   blockSize: number
 }> = ({ units, onClickUnit, isEnemy = false, blockSize }) => {
 
-  return units.map((unit, index) => (
-    <BoardBlock key={index}
+  return units.map((unit) => (
+    <BoardBlock key={unit.index}
       className='flex flex-col justify-center items-center gap-1 absolute border-0 transition-all'
       style={{
         left: unit.x * blockSize,

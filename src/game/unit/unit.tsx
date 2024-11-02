@@ -12,7 +12,14 @@ export abstract class Unit {
   abstract atk: number
   abstract def: number
 
+  abstract title: string
+  abstract name: string
   abstract avatar: string
+
+  /**
+   * @param index for key of map
+   */
+  constructor(public index: number) { }
 
   summon(x: number, y: number) {
     this.x = x

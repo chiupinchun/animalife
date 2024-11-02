@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import BattleCore from './components/core'
-import { Jack } from '@game/unit/warrior/jack'
+import { MercenaryJason } from '@game/unit/warrior/jack'
 import { Unit } from '@game/unit/unit'
 
 interface Props { }
@@ -8,10 +8,10 @@ interface Props { }
 const Page: FC<Props> = () => {
   const team: Unit[] = []
   for (let i = 0; i < 6; i++) {
-    team.push(new Jack(10))
+    team.push(new MercenaryJason(10, i))
   }
 
-  const fakeEnemy = new Jack(20)
+  const fakeEnemy = new MercenaryJason(20, 0)
   fakeEnemy.x = 2
   fakeEnemy.y = 6
 

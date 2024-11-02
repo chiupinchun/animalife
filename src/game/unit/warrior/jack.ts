@@ -1,8 +1,10 @@
 import { Unit, Warrior } from "../unit";
 import Avatar from '@assets/defaultAvatar.webp'
 
-export class Jack extends Warrior {
+export class MercenaryJason extends Warrior {
   avatar = Avatar
+  name = '傑森'
+  title = '傭兵護衛'
 
   cost = 3
   maxHp: number
@@ -10,8 +12,8 @@ export class Jack extends Warrior {
   atk: number
   def: number
 
-  constructor(lv: number) {
-    super()
+  constructor(lv: number, index: number) {
+    super(index)
 
     this.maxHp = this.hp = lv
     this.atk = lv
