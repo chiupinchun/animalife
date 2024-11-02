@@ -1,7 +1,7 @@
 import { Block } from "@game/board";
 import { Unit } from "@game/unit/unit";
 import { Reducer } from "react";
-import { BOARD_Y_COUNT } from "../constants/game";
+import { BOARD_Y_COUNT, COST_LIMIT } from "../constants/game";
 
 export interface ReducerState {
   selectedUnit: Unit | null
@@ -127,7 +127,7 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
     case 'turnEnd':
       return {
         ...state,
-        cost: state.cost + 1
+        cost: Math.min(state.cost + 1, COST_LIMIT)
       }
     case 'error':
       return {
