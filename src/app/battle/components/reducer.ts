@@ -1,7 +1,7 @@
 import { Block } from "@game/board";
 import { Unit } from "@game/unit/unit";
 import { Reducer } from "react";
-import { BOARD_Y_COUNT } from "../constants/board";
+import { BOARD_Y_COUNT } from "../constants/game";
 
 export interface ReducerState {
   selectedUnit: Unit | null

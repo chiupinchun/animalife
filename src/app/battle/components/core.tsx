@@ -1,6 +1,6 @@
 import { Block, BlockAreaType, getInitialBoard } from '@game/board'
 import { FC, ReactNode, useEffect, useReducer, useRef, useState } from 'react'
-import { BOARD_Y_COUNT, BOARD_X_COUNT, DOMAIN_LENGTH } from '../constants/board'
+import { BOARD_Y_COUNT, BOARD_X_COUNT, DOMAIN_LENGTH } from '../constants/game'
 import { Unit } from '@game/unit/unit'
 import { twMerge } from 'tailwind-merge'
 import { stop } from '@app/common/utils/elementEvent'
