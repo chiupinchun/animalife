@@ -128,6 +128,7 @@ const BattleCore: FC<Props> = ({ allies, enemies, initialCost }) => {
   }
 
   const handleClickStandbyUnit = (unit: Unit) => {
+    if (turnPhase !== TurnPhase.allyAction) { return }
     if (state.cost < unit.cost) {
       dispatch({ type: 'error', payload: '資源不足。' })
       return
