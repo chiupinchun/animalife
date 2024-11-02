@@ -1,6 +1,7 @@
 import { Block } from "@game/board";
 import { Unit } from "@game/unit/unit";
 import { Reducer } from "react";
+import { BOARD_Y_COUNT } from "../constants/board";
 
 export enum SelectMode {
   summon,
@@ -30,6 +31,11 @@ export type ReducerAction = {
   type: 'unitAction',
   payload: {
     block: Block
+  }
+} | {
+  type: 'move',
+  payload: {
+    unit: Unit
   }
 } | {
   type: 'skill',
@@ -91,6 +97,30 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
           };
       }
       break
+    case 'move':
+      const unitToMove = action.payload.unit
+      const directY = state.enemies.includes(unitToMove) ? -1 : 1
+      const goalCoordinate = { x: unitToMove.x, y: unitToMove.y + directY * unitToMove.step }
+      if (goalCoordinate.y < 0 || goalCoordinate.y > BOARD_Y_COUNT) { return state }
+
+      const isBlocked = (unit: Unit) => unit.x === goalCoordinate.x
+        && (unit.y - unitToMove.y) * directY > 0
+        && Math.abs(unit.y - unitToMove.y) <= unitToMove.step
+      const isGoalContainUnit = state.enemies.some(isBlocked) || state.summonedUnits.some(isBlocked)
+      if (isGoalContainUnit) { return state }
+
+      const newEnemies = state.enemies.map(unit =>
+        unit === unitToMove ? { ...unit, y: goalCoordinate.y } : unit
+      )
+      const newSummonedUnits = state.summonedUnits.map(unit =>
+        unit === unitToMove ? { ...unit, y: goalCoordinate.y } : unit
+      )
+
+      return {
+        ...state,
+        enemies: state.enemies.includes(unitToMove) ? newEnemies : state.enemies,
+        summonedUnits: state.summonedUnits.includes(unitToMove) ? newSummonedUnits : state.summonedUnits,
+      }
     case 'skill':
       const { target } = action.payload
 

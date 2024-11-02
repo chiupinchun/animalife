@@ -56,6 +56,13 @@ const Units: FC<{
   ))
 }
 
+enum TurnPhase {
+  allyMove,
+  allyAction,
+  enemyMove,
+  enemyAction
+}
+
 interface Props {
   initialCost: number
   team: Unit[]
@@ -74,6 +81,40 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
     cost: initialCost,
     error: null
   })
+
+  const [turnPhase, setTurnPhase] = useState(TurnPhase.allyAction)
+  useEffect(() => {
+    const handleMoveUnits = async (units: Unit[], onFinished: () => void) => {
+      for (let i = 0; i < units.length; i++) {
+        dispatch({
+          type: 'move',
+          payload: { unit: units[i] }
+        })
+        await new Promise(resolve => setTimeout(resolve, 300))
+      }
+      onFinished()
+    }
+
+    switch (turnPhase) {
+      case TurnPhase.allyMove:
+        handleMoveUnits(
+          state.summonedUnits,
+          () => setTurnPhase(phase => phase + 1)
+        )
+        break
+      case TurnPhase.allyAction:
+        break
+      case TurnPhase.enemyMove:
+        handleMoveUnits(
+          state.enemies,
+          () => setTurnPhase(phase => phase + 1)
+        )
+        break
+      case TurnPhase.enemyAction:
+        setTurnPhase(TurnPhase.allyMove)
+        break
+    }
+  }, [turnPhase])
 
   useEffect(() => {
     const resetSelect = () => {
@@ -134,6 +175,11 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
     }
   }
 
+  const handleTurnEnd = () => {
+    setTurnPhase(phase => phase + 1)
+    dispatch({ type: 'turnEnd' })
+  }
+
   const [blockSize, setBlockSize] = useState(0)
   const boardRef = useRef<HTMLDivElement>(null!)
   useEffect(() => {
@@ -187,7 +233,7 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
                 可用資源：
                 <span>{state.cost}</span>
               </div>
-              <Button onClick={() => dispatch({ type: 'turnEnd' })} className='w-full' variant="contained">回合結束</Button>
+              <Button onClick={handleTurnEnd} className='w-full' variant="contained">回合結束</Button>
             </div>
           </div>
         </div>

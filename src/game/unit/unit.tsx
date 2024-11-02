@@ -1,7 +1,7 @@
 export abstract class Unit {
   x = 0
   y = 0
-  abstract step: number
+  step = 1
   abstract reach: number
   abstract cost: number
 
@@ -25,12 +25,10 @@ export abstract class Unit {
 }
 
 export abstract class Shooter extends Unit {
-  step = 1
   reach = 3
 }
 
 export abstract class Warrior extends Unit {
-  step = 2
   reach = 1
 }
 
