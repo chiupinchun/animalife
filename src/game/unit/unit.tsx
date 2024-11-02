@@ -1,3 +1,5 @@
+import { calcDistance } from "@app/common/utils/math"
+
 export abstract class Unit {
   x = 0
   y = 0
@@ -18,7 +20,19 @@ export abstract class Unit {
     return this
   }
 
-  abstract skill(target: Unit): void
+  searchTarget(enemies: Unit[]): [Unit[], Unit[]]
+  searchTarget(enemies: Unit[], allies: Unit[]): [Unit[], Unit[]]
+  searchTarget(enemies: Unit[]) {
+    const targets = enemies.filter(
+      unit => calcDistance([this.x, this.y], [unit.x, unit.y]) <= this.reach
+    )
+    return [
+      targets.slice(0, 1),
+      []
+    ]
+  }
+
+  abstract skill(enemies: Unit[], allies: Unit[]): void
   receiveDmg(value: number) {
     this.hp = Math.max(this.hp - value, 0)
   }

@@ -18,7 +18,8 @@ export class Jack extends Warrior {
     this.def = lv
   }
 
-  skill(target: Unit): void {
+  skill(targets: Unit[]): void {
+    const [target] = targets
     const baseDmg = 3
     const realDmg = Math.floor(baseDmg * this.atk / target.def)
     target.receiveDmg(realDmg)

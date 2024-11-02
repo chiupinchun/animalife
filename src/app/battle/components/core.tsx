@@ -4,8 +4,7 @@ import { BOARD_Y_COUNT, BOARD_X_COUNT, DOMAIN_LENGTH } from '../constants/board'
 import { Unit } from '@game/unit/unit'
 import { twMerge } from 'tailwind-merge'
 import { stop } from '@app/common/utils/elementEvent'
-import { reducer, SelectMode } from './reducer'
-import { calcDistance } from '@app/common/utils/math'
+import { reducer } from './reducer'
 import HpBar from '@app/common/components/hpBar'
 import { Badge, Button, Snackbar } from '@mui/material'
 
@@ -74,7 +73,6 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
 
   const [state, dispatch] = useReducer(reducer, {
     selectedUnit: null,
-    mode: null,
     standbyUnits: team,
     summonedUnits: [],
     enemies: enemies,
@@ -87,7 +85,7 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
     const handleMoveUnits = async (units: Unit[], onFinished: () => void) => {
       for (let i = 0; i < units.length; i++) {
         dispatch({
-          type: 'move',
+          type: 'action',
           payload: { unit: units[i] }
         })
         await new Promise(resolve => setTimeout(resolve, 300))
@@ -126,17 +124,7 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
   }, [])
 
   const canSummon = (block: Block) => {
-    return state.mode === SelectMode.summon && block.areaType === BlockAreaType.ally
-  }
-
-  const canSkill = (target: { x: number, y: number }) => {
-    if (!state.selectedUnit) { return false }
-    if (state.mode !== SelectMode.skill) { return false }
-    const distance = calcDistance(
-      [state.selectedUnit.x, state.selectedUnit.y],
-      [target.x, target.y]
-    )
-    return distance > 0 && distance <= state.selectedUnit.reach
+    return state.selectedUnit && block.areaType === BlockAreaType.ally
   }
 
   const handleClickStandbyUnit = (unit: Unit) => {
@@ -144,35 +132,12 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
       dispatch({ type: 'error', payload: '資源不足。' })
       return
     }
-    dispatch({ type: 'selectUnit', payload: { unit, mode: SelectMode.summon } })
+    dispatch({ type: 'selectUnit', payload: { unit } })
   }
 
   const handleClickBoard = (block: Block) => {
     if (!canSummon(block)) { return }
     dispatch({ type: 'summon', payload: { block } })
-  }
-
-  const handleClickSummonedUnit = (unit: Unit) => {
-    if (state.mode === SelectMode.skill) {
-      dispatch({ type: 'clearSelection' })
-    } else {
-      dispatch({
-        type: 'selectUnit',
-        payload: {
-          mode: SelectMode.skill,
-          unit
-        }
-      })
-    }
-  }
-
-  const handleClickEnemyUnit = (target: Unit) => {
-    if (canSkill(target)) {
-      dispatch({
-        type: 'skill',
-        payload: { target }
-      })
-    }
   }
 
   const handleTurnEnd = () => {
@@ -203,16 +168,15 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
               <BoardBlock
                 key={`${block.x},${block.y}`}
                 className={twMerge(
-                  canSummon(block) ? 'bg-slate-300 cursor-pointer' : '',
-                  canSkill(block) ? 'bg-red-300' : ''
+                  canSummon(block) ? 'bg-slate-300 cursor-pointer' : ''
                 )}
                 onClick={() => handleClickBoard(block)}
               />
             ))}
 
-            <Units units={state.summonedUnits} onClickUnit={handleClickSummonedUnit} blockSize={blockSize} />
+            <Units onClickUnit={() => { }} units={state.summonedUnits} blockSize={blockSize} />
 
-            <Units units={state.enemies} onClickUnit={handleClickEnemyUnit} isEnemy blockSize={blockSize} />
+            <Units onClickUnit={() => { }} units={state.enemies} isEnemy blockSize={blockSize} />
           </div>
           <div className='flex flex-col justify-between p-4 border rounded-lg' onClick={stop()}>
             <div>

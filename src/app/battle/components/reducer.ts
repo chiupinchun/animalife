@@ -3,14 +3,8 @@ import { Unit } from "@game/unit/unit";
 import { Reducer } from "react";
 import { BOARD_Y_COUNT } from "../constants/board";
 
-export enum SelectMode {
-  summon,
-  skill
-}
-
 export interface ReducerState {
   selectedUnit: Unit | null
-  mode: SelectMode | null
   standbyUnits: Unit[]
   summonedUnits: Unit[]
   enemies: Unit[]
@@ -22,8 +16,7 @@ export interface ReducerState {
 export type ReducerAction = {
   type: 'selectUnit',
   payload: {
-    unit: Unit,
-    mode: SelectMode
+    unit: Unit
   }
 } | {
   type: 'clearSelection'
@@ -33,14 +26,9 @@ export type ReducerAction = {
     block: Block
   }
 } | {
-  type: 'move',
+  type: 'action',
   payload: {
     unit: Unit
-  }
-} | {
-  type: 'skill',
-  payload: {
-    target: Unit
   }
 } | {
   type: 'turnEnd'
@@ -53,16 +41,14 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
   const { selectedUnit } = state
   switch (action.type) {
     case 'selectUnit':
-      const { unit, mode } = action.payload
+      const { unit } = action.payload
       return {
         ...state,
-        mode,
         selectedUnit: unit
       }
     case 'clearSelection':
       return {
         ...state,
-        mode: null,
         selectedUnit: null
       }
     case 'summon':
@@ -82,62 +68,58 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
           cost: newCost,
           summonedUnits: newSummonedUnits,
           standbyUnits: newStandbyUnits,
+          selectedUnit: null
+        }
+      }
+
+      return {
+        ...state,
+        selectedUnit: null,
+        error: '資源不足。'
+      }
+    case 'action':
+      const unitToAction = action.payload.unit
+      const isEnemy = state.enemies.includes(unitToAction)
+
+      const skillTargetGroup = unitToAction.searchTarget(
+        isEnemy ? state.summonedUnits : state.enemies,
+        isEnemy ? state.enemies : state.summonedUnits
+      )
+      if (skillTargetGroup.some(targets => targets.length)) {
+        unitToAction.skill(...skillTargetGroup)
+
+        return {
+          ...state,
+          enemies: state.enemies.filter(unit => unit.hp > 0),
+          summonedUnits: state.summonedUnits.filter(unit => unit.hp > 0),
           selectedUnit: null,
           mode: null
         }
       }
 
-      return {
-        ...state,
-        selectedUnit: null,
-        mode: null,
-        error: '資源不足。'
-      }
-    case 'move':
-      const unitToMove = action.payload.unit
-      const directY = state.enemies.includes(unitToMove) ? -1 : 1
-      const goalCoordinate = { x: unitToMove.x, y: unitToMove.y + directY * unitToMove.step }
+      const directY = isEnemy ? -1 : 1
+      const goalCoordinate = { x: unitToAction.x, y: unitToAction.y + directY * unitToAction.step }
       if (goalCoordinate.y < 0 || goalCoordinate.y > BOARD_Y_COUNT) { return state }
 
       const isBlocked = (unit: Unit) => unit.x === goalCoordinate.x
-        && (unit.y - unitToMove.y) * directY > 0
-        && Math.abs(unit.y - unitToMove.y) <= unitToMove.step
+        && (unit.y - unitToAction.y) * directY > 0
+        && Math.abs(unit.y - unitToAction.y) <= unitToAction.step
       const isGoalContainUnit = state.enemies.some(isBlocked) || state.summonedUnits.some(isBlocked)
       if (isGoalContainUnit) { return state }
 
-      const newUnit = structuredClone(unitToMove)
+      const newUnit = structuredClone(unitToAction)
       newUnit.y = goalCoordinate.y
       const newEnemies = state.enemies.map(unit =>
-        unit === unitToMove ? newUnit : unit
+        unit === unitToAction ? newUnit : unit
       )
       const newSummonedUnits = state.summonedUnits.map(unit =>
-        unit === unitToMove ? newUnit : unit
+        unit === unitToAction ? newUnit : unit
       )
 
       return {
         ...state,
-        enemies: state.enemies.includes(unitToMove) ? newEnemies : state.enemies,
-        summonedUnits: state.summonedUnits.includes(unitToMove) ? newSummonedUnits : state.summonedUnits,
-      }
-    case 'skill':
-      const { target } = action.payload
-
-      if (!selectedUnit) {
-        return { ...state, error: '未選擇要部署的角色。' }
-      }
-
-      selectedUnit.skill(target)
-      if (target.hp <= 0) {
-        const index = state.enemies.indexOf(target)
-        if (index > -1) {
-          state.enemies.splice(index, 1)
-        }
-      }
-
-      return {
-        ...state,
-        selectedUnit: null,
-        mode: null
+        enemies: state.enemies.includes(unitToAction) ? newEnemies : state.enemies,
+        summonedUnits: state.summonedUnits.includes(unitToAction) ? newSummonedUnits : state.summonedUnits,
       }
     case 'turnEnd':
       return {
