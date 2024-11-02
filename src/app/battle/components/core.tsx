@@ -88,16 +88,6 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
     return state.mode === SelectMode.summon && block.areaType === BlockAreaType.ally
   }
 
-  const canMove = (block: Block) => {
-    if (!state.selectedUnit) { return false }
-    if (state.mode !== SelectMode.move) { return false }
-    const distance = calcDistance(
-      [state.selectedUnit.x, state.selectedUnit.y],
-      [block.x, block.y]
-    )
-    return distance > 0 && distance <= state.selectedUnit.step
-  }
-
   const canSkill = (target: { x: number, y: number }) => {
     if (!state.selectedUnit) { return false }
     if (state.mode !== SelectMode.skill) { return false }
@@ -117,18 +107,22 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
   }
 
   const handleClickBoard = (block: Block) => {
-    if (!canSummon(block) && !canMove(block)) { return }
+    if (!canSummon(block)) { return }
     dispatch({ type: 'unitAction', payload: { block } })
   }
 
   const handleClickSummonedUnit = (unit: Unit) => {
-    const mode = state.mode === SelectMode.move
-      ? SelectMode.skill
-      : SelectMode.move
-    dispatch({
-      type: 'selectUnit',
-      payload: { unit, mode }
-    })
+    if (state.mode === SelectMode.skill) {
+      dispatch({ type: 'clearSelection' })
+    } else {
+      dispatch({
+        type: 'selectUnit',
+        payload: {
+          mode: SelectMode.skill,
+          unit
+        }
+      })
+    }
   }
 
   const handleClickEnemyUnit = (target: Unit) => {
@@ -164,7 +158,6 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
                 key={`${block.x},${block.y}`}
                 className={twMerge(
                   canSummon(block) ? 'bg-slate-300 cursor-pointer' : '',
-                  canMove(block) ? 'bg-green-300 cursor-pointer' : '',
                   canSkill(block) ? 'bg-red-300' : ''
                 )}
                 onClick={() => handleClickBoard(block)}

@@ -4,7 +4,6 @@ import { Reducer } from "react";
 
 export enum SelectMode {
   summon,
-  move,
   skill
 }
 
@@ -90,13 +89,6 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
             mode: null,
             error: '資源不足。'
           };
-        case SelectMode.move:
-          selectedUnit.summon(block.x, block.y)
-          return {
-            ...state,
-            selectedUnit: null,
-            mode: null
-          }
       }
       break
     case 'skill':
