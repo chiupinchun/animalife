@@ -32,7 +32,7 @@ const Page: FC<Props> = () => {
 
   return (
     <>
-      <BattleCore allies={allies} enemies={enemies} />
+      <BattleCore allies={allies} enemies={enemies} onBattleEnd={ctx => console.log(ctx)} />
     </>
   )
 }

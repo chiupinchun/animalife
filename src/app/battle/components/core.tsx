@@ -63,9 +63,14 @@ enum TurnPhase {
 interface Props {
   allies: Team
   enemies: Team
+  onBattleEnd: (battleCtx: {
+    isWin: boolean
+    allies: Team
+    enemies: Team
+  }) => void
 }
 
-const BattleCore: FC<Props> = ({ allies, enemies }) => {
+const BattleCore: FC<Props> = ({ allies, enemies, onBattleEnd }) => {
   const board = useRef(getInitialBoard(BOARD_X_COUNT, BOARD_Y_COUNT, DOMAIN_LENGTH))
 
   allies.leader.x = enemies.leader.x = Math.floor(BOARD_X_COUNT / 2)
@@ -110,6 +115,14 @@ const BattleCore: FC<Props> = ({ allies, enemies }) => {
         dispatch({ type: 'summonEnemy' })
         setTurnPhase(TurnPhase.allyMove)
         break
+    }
+
+    if (state.allies.leader.hp <= 0 || state.enemies.leader.hp <= 0) {
+      onBattleEnd({
+        isWin: state.enemies.leader.hp <= 0,
+        allies: state.allies,
+        enemies: state.enemies
+      })
     }
   }, [turnPhase])
 
