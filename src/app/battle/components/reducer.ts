@@ -107,7 +107,10 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
       const isGoalContainUnit = state.enemies.some(isBlocked) || state.summonedUnits.some(isBlocked)
       if (isGoalContainUnit) { return state }
 
-      const newUnit = structuredClone(unitToAction)
+      const newUnit = Object.assign(
+        Object.create(Object.getPrototypeOf(unitToAction)),
+        structuredClone(unitToAction)
+      )
       newUnit.y = goalCoordinate.y
       const newEnemies = state.enemies.map(unit =>
         unit === unitToAction ? newUnit : unit
