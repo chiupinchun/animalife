@@ -73,9 +73,10 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
 
   const [state, dispatch] = useReducer(reducer, {
     selectedUnit: null,
-    standbyUnits: team,
-    summonedUnits: [],
-    enemies: enemies,
+    standbyAllies: team,
+    summonedAllies: [],
+    standbyEnemies: [],
+    summonedEnemies: enemies,
     cost: initialCost,
     error: null
   })
@@ -96,7 +97,7 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
     switch (turnPhase) {
       case TurnPhase.allyMove:
         handleMoveUnits(
-          state.summonedUnits,
+          state.summonedAllies,
           () => setTurnPhase(phase => phase + 1)
         )
         break
@@ -104,7 +105,7 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
         break
       case TurnPhase.enemyMove:
         handleMoveUnits(
-          state.enemies,
+          state.summonedEnemies,
           () => setTurnPhase(phase => phase + 1)
         )
         break
@@ -174,15 +175,15 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
               />
             ))}
 
-            <Units onClickUnit={() => { }} units={state.summonedUnits} blockSize={blockSize} />
+            <Units onClickUnit={() => { }} units={state.summonedAllies} blockSize={blockSize} />
 
-            <Units onClickUnit={() => { }} units={state.enemies} isEnemy blockSize={blockSize} />
+            <Units onClickUnit={() => { }} units={state.summonedEnemies} isEnemy blockSize={blockSize} />
           </div>
           <div className='flex flex-col justify-between p-4 border rounded-lg' onClick={stop()}>
             <div>
               <div className='flex justify-between mb-4 border-b font-bold'>手牌區</div>
               <div className='grid grid-cols-4 md:grid-cols-2 auto-rows-min gap-4 md:w-32'>
-                {state.standbyUnits.map((unit, index) => (
+                {state.standbyAllies.map((unit, index) => (
                   <Badge key={index} badgeContent={unit.cost} color="primary">
                     <img src={unit.avatar}
                       className='cursor-pointer'
