@@ -154,6 +154,7 @@ const BattleCore: FC<Props> = ({ allies, enemies, onBattleEnd }) => {
   }
 
   const handleTurnEnd = () => {
+    if (turnPhase !== TurnPhase.allyAction) { return }
     setTurnPhase(phase => phase + 1)
     dispatch({ type: 'turnEnd' })
   }
