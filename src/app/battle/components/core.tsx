@@ -98,9 +98,9 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
     return distance > 0 && distance <= state.selectedUnit.step
   }
 
-  const canAttack = (target: { x: number, y: number }) => {
+  const canSkill = (target: { x: number, y: number }) => {
     if (!state.selectedUnit) { return false }
-    if (state.mode !== SelectMode.attack) { return false }
+    if (state.mode !== SelectMode.skill) { return false }
     const distance = calcDistance(
       [state.selectedUnit.x, state.selectedUnit.y],
       [target.x, target.y]
@@ -123,7 +123,7 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
 
   const handleClickSummonedUnit = (unit: Unit) => {
     const mode = state.mode === SelectMode.move
-      ? SelectMode.attack
+      ? SelectMode.skill
       : SelectMode.move
     dispatch({
       type: 'selectUnit',
@@ -132,9 +132,9 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
   }
 
   const handleClickEnemyUnit = (target: Unit) => {
-    if (canAttack(target)) {
+    if (canSkill(target)) {
       dispatch({
-        type: 'attack',
+        type: 'skill',
         payload: { target }
       })
     }
@@ -165,7 +165,7 @@ const BattleCore: FC<Props> = ({ team, enemies, initialCost }) => {
                 className={twMerge(
                   canSummon(block) ? 'bg-slate-300 cursor-pointer' : '',
                   canMove(block) ? 'bg-green-300 cursor-pointer' : '',
-                  canAttack(block) ? 'bg-red-300' : ''
+                  canSkill(block) ? 'bg-red-300' : ''
                 )}
                 onClick={() => handleClickBoard(block)}
               />

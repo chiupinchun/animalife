@@ -5,7 +5,7 @@ import { Reducer } from "react";
 export enum SelectMode {
   summon,
   move,
-  attack
+  skill
 }
 
 export interface ReducerState {
@@ -33,7 +33,7 @@ export type ReducerAction = {
     block: Block
   }
 } | {
-  type: 'attack',
+  type: 'skill',
   payload: {
     target: Unit
   }
@@ -99,7 +99,7 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
           }
       }
       break
-    case 'attack':
+    case 'skill':
       const { target } = action.payload
 
       if (!selectedUnit) {
