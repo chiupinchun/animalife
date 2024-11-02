@@ -107,9 +107,7 @@ const BattleCore: FC<Props> = ({ allies, enemies }) => {
         )
         break
       case TurnPhase.enemyAction:
-        if (state.enemies.standby.length) {
-          // TODO
-        }
+        dispatch({ type: 'summonEnemy' })
         setTurnPhase(TurnPhase.allyMove)
         break
     }

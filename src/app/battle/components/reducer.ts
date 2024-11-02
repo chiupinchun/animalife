@@ -2,6 +2,7 @@ import { Block } from "@game/board";
 import { Unit } from "@game/unit/unit";
 import { Reducer } from "react";
 import { BOARD_Y_COUNT, COST_LIMIT } from "../constants/game";
+import { getAutoSummonCoordinate } from "../utils/game";
 
 export interface Team {
   leader: Unit
@@ -161,8 +162,34 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
         }
       }
     case 'summonEnemy':
-      // TODO
-      break
+      const standbyEnemyUnits = [...state.enemies.standby]
+      const summonedEnemyUnits = [...state.enemies.summoned]
+      let enemyCost = state.enemies.cost
+      while (
+        standbyEnemyUnits[0]
+        && standbyEnemyUnits[0].cost <= enemyCost
+      ) {
+        const unit = standbyEnemyUnits.shift()!
+        const coordinate = getAutoSummonCoordinate([
+          state.allies.leader,
+          ...state.allies.summoned,
+          state.enemies.leader,
+          ...summonedEnemyUnits
+        ], true)
+        if (coordinate) {
+          summonedEnemyUnits.push(unit.summon(coordinate.x, coordinate.y))
+          enemyCost -= unit.cost
+        }
+      }
+      return {
+        ...state,
+        enemies: {
+          ...state.enemies,
+          standby: standbyEnemyUnits,
+          summoned: summonedEnemyUnits,
+          cost: enemyCost
+        }
+      }
     case 'error':
       return {
         ...state,
