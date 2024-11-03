@@ -40,8 +40,25 @@ export abstract class Unit {
   }
 
   abstract skill(enemies: Unit[], allies: Unit[]): void
+
+  receiveAtk(value: number, from: Unit): void
+  receiveAtk(value: number) {
+    this.receiveDmg(value)
+  }
+
   receiveDmg(value: number) {
     this.hp = Math.max(this.hp - value, 0)
+  }
+
+  abstract info: {
+    passives: {
+      title: string
+      description: string
+    }[]
+    skill: {
+      title: string
+      description: string
+    }
   }
 }
 

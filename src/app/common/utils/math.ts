@@ -7,3 +7,7 @@ export const calcDistance = (
 
   return Math.pow(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2), 0.5)
 }
+
+export const getRandomByRate = (rate: number) => {
+  return Math.random() < rate
+}
