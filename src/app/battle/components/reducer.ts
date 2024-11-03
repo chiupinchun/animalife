@@ -101,8 +101,6 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action): Re
         isEnemy ? enemyTargets : allyTargets
       )
       if (skillTargetGroup.some(targets => targets.length)) {
-        // unitToAction.skill(...skillTargetGroup)
-
         return {
           ...state,
           skillProcess: {
@@ -119,14 +117,16 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action): Re
       const isBlocked = (unit: Unit) => unit.x === goalCoordinate.x
         && (unit.y - unitToAction.y) * directY > 0
         && Math.abs(unit.y - unitToAction.y) <= unitToAction.step
-      const isGoalContainUnit = enemyTargets.some(isBlocked) || allyTargets.some(isBlocked)
-      if (isGoalContainUnit) { return state }
+
+      const blockedUnits = [...enemyTargets, ...allyTargets]
+        .filter(isBlocked)
+        .sort((a, b) => (a.y - b.y) * directY)
 
       const newUnit = Object.assign(
         Object.create(Object.getPrototypeOf(unitToAction)),
         structuredClone(unitToAction)
       )
-      newUnit.y = goalCoordinate.y
+      newUnit.y = blockedUnits.length ? (blockedUnits[0].y - directY) : goalCoordinate.y
       const newEnemies = state.enemies.summoned.map(unit =>
         unit === unitToAction ? newUnit : unit
       )
