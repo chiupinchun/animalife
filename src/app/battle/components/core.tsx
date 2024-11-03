@@ -31,8 +31,9 @@ const UnitComponent: FC<{
   unit: Unit
   onClick?: () => void
   isEnemy?: boolean
+  isCastingSkill?: boolean
   blockSize: number
-}> = ({ unit, onClick, isEnemy = false, blockSize }) => {
+}> = ({ unit, onClick, isEnemy = false, isCastingSkill = false, blockSize }) => {
 
   return <BoardBlock key={unit.index}
     className='flex flex-col justify-center items-center gap-1 absolute border-0 transition-all'
@@ -44,8 +45,9 @@ const UnitComponent: FC<{
       <img
         src={unit.avatar}
         className={twMerge(
-          'cursor-pointer',
-          isEnemy ? 'rotate-180' : ''
+          'cursor-pointer transition-all',
+          isEnemy ? 'rotate-180' : '',
+          isCastingSkill ? 'shadow-[0_0_15px_rgba(0,205,255,0.8)] animate-pulse' : ''
         )}
         onClick={onClick}
       />
@@ -76,9 +78,14 @@ const BattleCore: FC<Props> = ({ allies, enemies, onBattleEnd }) => {
   allies.leader.y = 0
   enemies.leader.y = BOARD_Y_COUNT - 1
   const [state, dispatch] = useReducer(reducer, {
-    selectedUnit: null,
     allies,
     enemies,
+    selectedUnit: null,
+    skillProcess: {
+      castingUnit: null,
+      targetGroup: [[], []]
+    },
+
     error: null
   })
 
@@ -90,7 +97,9 @@ const BattleCore: FC<Props> = ({ allies, enemies, onBattleEnd }) => {
           type: 'action',
           payload: { unit: units[i] }
         })
-        await new Promise(resolve => setTimeout(resolve, 300))
+        await new Promise(resolve => setTimeout(resolve, 200))
+        dispatch({ type: 'actionEnd' })
+        await new Promise(resolve => setTimeout(resolve, 200))
       }
       onFinished()
     }
@@ -187,14 +196,26 @@ const BattleCore: FC<Props> = ({ allies, enemies, onBattleEnd }) => {
               />
             ))}
 
-            <UnitComponent unit={state.allies.leader} blockSize={blockSize} />
+            <UnitComponent
+              unit={state.allies.leader} blockSize={blockSize}
+              isCastingSkill={state.skillProcess.castingUnit === state.allies.leader}
+            />
             {state.allies.summoned.map(unit => (
-              <UnitComponent key={unit.index} unit={unit} blockSize={blockSize} />
+              <UnitComponent
+                key={unit.index} unit={unit} blockSize={blockSize}
+                isCastingSkill={state.skillProcess.castingUnit === unit}
+              />
             ))}
 
-            <UnitComponent unit={state.enemies.leader} isEnemy blockSize={blockSize} />
+            <UnitComponent
+              unit={state.enemies.leader} isEnemy blockSize={blockSize}
+              isCastingSkill={state.skillProcess.castingUnit === state.enemies.leader}
+            />
             {state.enemies.summoned.map(unit => (
-              <UnitComponent key={unit.index} unit={unit} isEnemy blockSize={blockSize} />
+              <UnitComponent
+                key={unit.index} unit={unit} isEnemy blockSize={blockSize}
+                isCastingSkill={state.skillProcess.castingUnit === unit}
+              />
             ))}
           </div>
           <div className='flex flex-col justify-between p-4 border rounded-lg' onClick={stop()}>

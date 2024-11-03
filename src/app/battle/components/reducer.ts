@@ -6,9 +6,14 @@ import { getAutoSummonCoordinate } from "../utils/game";
 import { Team } from "@game/types/battle";
 
 export interface ReducerState {
-  selectedUnit: Unit | null
   allies: Team
   enemies: Team
+  selectedUnit: Unit | null
+
+  skillProcess: {
+    castingUnit: Unit | null
+    targetGroup: [Unit[], Unit[]]
+  }
 
   error: string | null
 }
@@ -31,6 +36,8 @@ export type ReducerAction = {
     unit: Unit
   }
 } | {
+  type: 'actionEnd'
+} | {
   type: 'turnEnd'
 } | {
   type: 'summonEnemy'
@@ -39,7 +46,7 @@ export type ReducerAction = {
   payload: string | null
 }
 
-export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => {
+export const reducer: Reducer<ReducerState, ReducerAction> = (state, action): ReducerState => {
   const { selectedUnit } = state
   switch (action.type) {
     case 'selectUnit':
@@ -94,20 +101,14 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
         isEnemy ? enemyTargets : allyTargets
       )
       if (skillTargetGroup.some(targets => targets.length)) {
-        unitToAction.skill(...skillTargetGroup)
+        // unitToAction.skill(...skillTargetGroup)
 
         return {
           ...state,
-          enemies: {
-            ...state.enemies,
-            summoned: state.enemies.summoned.filter(unit => unit.hp > 0)
-          },
-          allies: {
-            ...state.allies,
-            summoned: state.allies.summoned.filter(unit => unit.hp > 0)
-          },
-          selectedUnit: null,
-          mode: null
+          skillProcess: {
+            castingUnit: unitToAction,
+            targetGroup: skillTargetGroup
+          }
         }
       }
 
@@ -144,6 +145,28 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
           summoned: state.allies.summoned.includes(unitToAction) ? newSummonedUnits : state.allies.summoned
         }
       }
+    case 'actionEnd': {
+      const { castingUnit } = state.skillProcess
+      if (castingUnit) {
+        castingUnit.skill(...state.skillProcess.targetGroup)
+      }
+
+      return {
+        ...state,
+        enemies: {
+          ...state.enemies,
+          summoned: state.enemies.summoned.filter(unit => unit.hp > 0)
+        },
+        allies: {
+          ...state.allies,
+          summoned: state.allies.summoned.filter(unit => unit.hp > 0)
+        },
+        skillProcess: {
+          castingUnit: null,
+          targetGroup: [[], []]
+        }
+      }
+    }
     case 'turnEnd':
       return {
         ...state,
