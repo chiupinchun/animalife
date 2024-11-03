@@ -87,6 +87,7 @@ export const reducer: Reducer<ReducerState, ReducerAction> = (state, action) => 
       const allyTargets = state.allies.summoned.concat(state.allies.leader)
       const enemyTargets = state.enemies.summoned.concat(state.enemies.leader)
       const isEnemy = state.enemies.summoned.includes(unitToAction)
+        || unitToAction === state.enemies.leader
 
       const skillTargetGroup = unitToAction.searchTarget(
         isEnemy ? allyTargets : enemyTargets,

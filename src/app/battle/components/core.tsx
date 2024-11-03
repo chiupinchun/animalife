@@ -98,7 +98,7 @@ const BattleCore: FC<Props> = ({ allies, enemies, onBattleEnd }) => {
     switch (turnPhase) {
       case TurnPhase.allyAction:
         handleUnitActions(
-          state.allies.summoned,
+          state.allies.summoned.concat(state.allies.leader),
           () => setTurnPhase(phase => phase + 1)
         )
         break
@@ -106,7 +106,7 @@ const BattleCore: FC<Props> = ({ allies, enemies, onBattleEnd }) => {
         break
       case TurnPhase.enemyAction:
         handleUnitActions(
-          state.enemies.summoned,
+          state.enemies.summoned.concat(state.enemies.leader),
           () => setTurnPhase(phase => phase + 1)
         )
         break
