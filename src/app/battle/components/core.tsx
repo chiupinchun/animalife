@@ -55,10 +55,10 @@ const UnitComponent: FC<{
 }
 
 enum TurnPhase {
-  allyMove,
   allyAction,
-  enemyMove,
-  enemyAction
+  summonAlly,
+  enemyAction,
+  summonEnemy
 }
 
 interface Props {
@@ -82,9 +82,9 @@ const BattleCore: FC<Props> = ({ allies, enemies, onBattleEnd }) => {
     error: null
   })
 
-  const [turnPhase, setTurnPhase] = useState(TurnPhase.allyAction)
+  const [turnPhase, setTurnPhase] = useState(TurnPhase.summonAlly)
   useEffect(() => {
-    const handleMoveUnits = async (units: Unit[], onFinished: () => void) => {
+    const handleUnitActions = async (units: Unit[], onFinished: () => void) => {
       for (let i = 0; i < units.length; i++) {
         dispatch({
           type: 'action',
@@ -96,23 +96,23 @@ const BattleCore: FC<Props> = ({ allies, enemies, onBattleEnd }) => {
     }
 
     switch (turnPhase) {
-      case TurnPhase.allyMove:
-        handleMoveUnits(
+      case TurnPhase.allyAction:
+        handleUnitActions(
           state.allies.summoned,
           () => setTurnPhase(phase => phase + 1)
         )
         break
-      case TurnPhase.allyAction:
+      case TurnPhase.summonAlly:
         break
-      case TurnPhase.enemyMove:
-        handleMoveUnits(
+      case TurnPhase.enemyAction:
+        handleUnitActions(
           state.enemies.summoned,
           () => setTurnPhase(phase => phase + 1)
         )
         break
-      case TurnPhase.enemyAction:
+      case TurnPhase.summonEnemy:
         dispatch({ type: 'summonEnemy' })
-        setTurnPhase(TurnPhase.allyMove)
+        setTurnPhase(TurnPhase.allyAction)
         break
     }
 
@@ -139,7 +139,7 @@ const BattleCore: FC<Props> = ({ allies, enemies, onBattleEnd }) => {
   }
 
   const handleClickStandbyUnit = (unit: Unit) => {
-    if (turnPhase !== TurnPhase.allyAction) { return }
+    if (turnPhase !== TurnPhase.summonAlly) { return }
     if (state.allies.cost < unit.cost) {
       dispatch({ type: 'error', payload: '資源不足。' })
       return
@@ -153,7 +153,7 @@ const BattleCore: FC<Props> = ({ allies, enemies, onBattleEnd }) => {
   }
 
   const handleTurnEnd = () => {
-    if (turnPhase !== TurnPhase.allyAction) { return }
+    if (turnPhase !== TurnPhase.summonAlly) { return }
     setTurnPhase(phase => phase + 1)
     dispatch({ type: 'turnEnd' })
   }
