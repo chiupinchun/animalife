@@ -1,6 +1,6 @@
 import { createHashRouter } from 'react-router-dom'
 import App from './App'
-import Map from '@app/map/page'
+import Farm from '@app/farm/page'
 import Home from '@app/home/page'
 import Battle from '@app/battle/page'
 
@@ -18,8 +18,8 @@ export const router = createHashRouter([
         element: <Battle />
       },
       {
-        path: 'map',
-        element: <Map />
+        path: 'farm',
+        element: <Farm />
       }
     ]
   }

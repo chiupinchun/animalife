@@ -7,7 +7,7 @@ const Home: FC<Props> = () => {
   return (
     <>
       <div className='w-screen h-screen flex justify-center items-center'>
-        <Link to='/battle'>進入遊戲</Link>
+        <Link to='/farm'>進入遊戲</Link>
       </div>
     </>
   )
