@@ -24,7 +24,9 @@
     "paths": {
       "@app/*": ["./app/*"],
       "@game/*": ["./game/*"],
-      "@assets/*": ["./assets/*"]
+      "@assets/*": ["./assets/*"],
+      "@api/*": ["./api/*"],
+      "@server/*": ["./server/*"],
     }
   },
   "include": ["src"]

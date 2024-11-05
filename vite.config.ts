@@ -9,8 +9,10 @@ export default defineConfig({
     alias: {
       '@app': path.resolve(__dirname, './src/app'),
       '@game': path.resolve(__dirname, './src/game'),
-      '@assets': path.resolve(__dirname, './src/assets')
+      '@assets': path.resolve(__dirname, './src/assets'),
+      '@api': path.resolve(__dirname, './src/api'),
+      '@server': path.resolve(__dirname, './src/server'),
     }
   },
-  base: '/doggy/'
+  base: '/animalife/'
 })
